@@ -1,0 +1,39 @@
+const express = require('express');
+const router = express.Router();
+const ParkingController = require('../Controller/ParkingController');
+
+
+router.get('/closest', function (req, res, next) {
+    let locationData = {};
+    locationData.lat = req.query.lat;
+    locationData.lon = req.query.lon;
+    locationData.is_for_disabled = req.query.is_for_disabled;
+    ParkingController.getClosestParking(locationData, (err, closestLocation) => {
+        if (err) return res.status(404).json({result: false, message: err, data: {}});
+        closestLocation.lon = closestLocation.location.coordinates[0];
+        closestLocation.lat = closestLocation.location.coordinates[1];
+        delete closestLocation.location;
+        return res.status(200).json({result: true, message: "", data: {closestLocation}})
+    })
+});
+
+
+router.post('/new', function (req, res, next) {
+    let parkingData = req.body;
+    parkingData.is_available = true;
+    parkingData.location = {};
+    parkingData.location.type = "Point";
+    parkingData.location.coordinates = [];
+    parkingData.location.coordinates[0] = req.body.lon;
+    parkingData.location.coordinates[1] = req.body.lat;
+    ParkingController.addOrUpdateParking(parkingData, (err, parkingInserted) => {
+        if (err) return res.status(404).json({result: false, message: err, data: {}});
+        parkingInserted.lon = parkingInserted.location.coordinates[0];
+        parkingInserted.lat = parkingInserted.location.coordinates[1];
+        delete parkingInserted.location;
+        res.status(201).json({result: true, message: "Parking place created", data: {parkingInserted}})
+    })
+});
+
+
+module.exports = router;

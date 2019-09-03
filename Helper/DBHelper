@@ -1,0 +1,20 @@
+const Mongoose = require('mongoose');
+
+
+MongoDBHelper = {
+    DBName: "Parking",
+
+    DBConnect: function () {
+        //mongoose.connection.readyState
+        //0: disconnected
+        //1: connected
+        //2: connecting
+        //3: disconnecting
+        if (Mongoose.connection.readyState === 0)
+            Mongoose.connect('mongodb://localhost/' + this.DBName, {
+                useNewUrlParser: true
+            });
+    }
+};
+
+module.exports.Mongo = MongoDBHelper;
